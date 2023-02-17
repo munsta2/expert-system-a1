@@ -1,52 +1,73 @@
 import pandas as pd
+import PySimpleGUI as sg
 
 
 def main():
 
     knowledge_base = pd.read_csv("course knowledgebase.csv")
 
-    print("welcome to our ES for selecting which computer science course you should take at laurentian!")
-    user_input = input("Enter next to continue or exit to quit: ")
 
-    
+    layout = [[sg.Column(into_window(), key='-COL0-'), sg.Column(year_input_window(), visible=False, key='-COL1-'), sg.Column(fav_prof_window(), visible=False, key='-COL2-')],
+          [sg.Button("Back"),sg.Button('Next'), sg.Button('Exit')]]
+    window = sg.Window('ES for selecting Computer science course', layout,finalize=True,element_justification='c')
+    window.TKroot.minsize(200,100)
+    window['Back'].update(disabled=True)
+    layout = 0
+    while True:
 
+        event, values = window.read()
+        print(event)
+        for item in values:
+            print(item,values[item])
 
-
-    while user_input != "next" and user_input != 'exit':
-         user_input = input("Enter next to continue or exit to quit: ")
-
-
-    if user_input.lower() == "next":
+   
         
-        knowledge_base = year_input(knowledge_base)
-        print("---------------------")
-        knowledge_base = fav_prof(knowledge_base)
-        print("---------------------")
 
-        # knowledge_base = knowledge_base.query("year == '{}'".format(year))
-        print(knowledge_base)
+       
+        if event in (None, 'Exit'):
+            break
+        elif event in 'Next':
+            print("I am happening")
+            window[f'-COL{layout}-'].update(visible=False)
+            layout+=1
+            window[f'-COL{layout}-'].update(visible=True)
+            print(layout)
+        elif event in "Back":
+            window[f'-COL{layout}-'].update(visible=False)
+            layout-=1
+            window[f'-COL{layout}-'].update(visible=True)
 
+        if layout == 0:
+            window['Back'].update(disabled=True)
+        else:
+            window['Back'].update(disabled=False)
 
-def year_input(knowledge_base):
-    years = ['first','second','third','fourth']
+        if layout >= 2:
+            window['Next'].update(disabled=True)
+        else:
+            window['Next'].update(disabled=False)
+    window.close()
+   
+def into_window():
+    return [[sg.Text('Welcome to our Expert System to determine which course you should !')]]
 
-    year = input("What year are you in? (first,second,third,fourth): ")
-    while year not in years:
-        year = input(" Please enter a valid year \n What year are you in? (first,second,third,fourth): ")
-    knowledge_base = knowledge_base.query("year == '{}'".format(year))
-    return knowledge_base
+def year_input_window():
+    year = ["First","Second","Third","Fourth"]
+    year2 = ["First","Second","Third","Fourth"]
+    text = [[sg.Text('What year are you in?')]]
+    radio_buttons = [[sg.Radio(x,1,key=x) for x in year]]
 
-def fav_prof(knowledge_base):
+    return text + radio_buttons
+
+def fav_prof_window():
     prof_list = ["Amr","Passi","Chris","Mark","Gerwal","Czapor"]
-    print("List of profs: ")
-    for item in prof_list:
-        print(item)
-    user_input = input("Who's your favorite prof? :")
 
-    while user_input not in prof_list:
-        user_input = input("please enter valid prof name \n Who's your favorite prof? :")
-    knowledge_base = knowledge_base.query("professor == '{}'".format(user_input))
-    return knowledge_base
+    layout = [[sg.Text('Who is your favourite Professor?')],
+           *[[sg.Radio(x,2,key=x) for x in prof_list]]
+    ]
+
+    return layout
+
 
 
 
