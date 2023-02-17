@@ -19,22 +19,26 @@ def main():
     while True:
 
         event, values = window.read()
-        print(event)
+        # print(event)
         if event in (None, 'Exit'):
             break
         elif event in 'Next':
-            print("I am happening")
             window[f'-COL{layout}-'].update(visible=False)
             layout+=1
             window[f'-COL{layout}-'].update(visible=True)
-            print(layout)
+            # print(layout)
         elif event in "Back":
             window[f'-COL{layout}-'].update(visible=False)
             layout-=1
             window[f'-COL{layout}-'].update(visible=True)
         elif event in "Enter":
-            infrence_engine(knowledge_base,values)
+            knowledge_base,explanation = infrence_engine(knowledge_base,values)
 
+
+
+            sg.popup_non_blocking(' , '.join(knowledge_base),explanation)
+            knowledge_base = pd.read_csv("course knowledgebase.csv")
+            
         if layout == 0:
             window['Back'].update(disabled=True)
         else:
@@ -50,9 +54,9 @@ def into_window():
     return [[sg.Text('Welcome to our Expert System to determine which course you should !')]]
 
 def year_input_window():
-    year = ["First","Second","Third","Fourth"]
+    year = ["first","second","third","fourth"]
     text = [[sg.Text('What year are you in?')]]
-    radio_buttons = [[sg.Radio(x,1,key=x) for x in year]]
+    radio_buttons = [[sg.Radio(x,1,key=x, default=1) for x in year]]
 
     return text + radio_buttons
 
@@ -60,12 +64,44 @@ def fav_prof_window():
     prof_list = ["Amr","Passi","Chris","Mark","Gerwal","Czapor"]
 
     layout = [[sg.Text('Who is your favourite Professor?')],
-           *[[sg.Radio(x,2,key=x) for x in prof_list]]
+           *[[sg.Radio(x,2,key=x, default=2) for x in prof_list]]
     ]
 
     return layout
 
 def infrence_engine(knowledge_base,values):
-    print("lol get rekt")
+
+    target_key = False
+
+    temp_dict = {}
+    for k,v in values.items():
+        if v != target_key:
+            temp_dict[k] = v
+    values = list(temp_dict.keys())
+    search_list = ["year","professor"]
+
+
+    for i in range(len(search_list)):
+
+        temp_df = knowledge_base.query("{} == '{}'".format(search_list[i],values[i]))
+        
+        if temp_df.empty:
+            pass
+        else:
+            knowledge_base = temp_df
+    return knowledge_base['course name'].tolist(), explanation_engine(values)
+
+def explanation_engine(values):
+
+    intro = "We choose this class for you for the following reasons: \n"
+    year = "Your currently in {} year \n".format(values[0])
+    prof = "Your favourite profssor is {} \n".format(values[1])
+
+    return intro + year + prof
+
+
+
 if __name__ == '__main__':
     main()
+
+
