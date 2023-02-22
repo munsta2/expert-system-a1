@@ -1,9 +1,12 @@
 import pandas as pd
 import PySimpleGUI as sg
+import os, sys
 
 
 def main():
-    knowledge_base = pd.read_csv("./course knowledgebase.csv")
+    os.chdir(sys._MEIPASS)
+    data_path= 'data\\course knowledgebase.csv'
+    knowledge_base = pd.read_csv(data_path)
     last_layout = [
         [sg.Text("press Enter to submit questions")],
         [sg.Button("Enter")]
@@ -44,7 +47,7 @@ def main():
             knowledge_base, explanation = infrence_engine(knowledge_base, values)
 
             sg.popup_non_blocking(' , '.join(knowledge_base), explanation)
-            knowledge_base = pd.read_csv("course knowledgebase.csv")
+            knowledge_base = pd.read_csv(data_path)
 
         if layout == 0:
             window['Back'].update(disabled=True)
